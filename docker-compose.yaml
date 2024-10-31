@@ -39,8 +39,8 @@ services:
     command: sh -c "yarn install && yarn run dev && echo 'Main Process Server started on http://localhost:${NODE_MAIN_HOST_PORT}'"
     working_dir: /usr/src/app
     volumes:
-      - ./src/main/package.json:/usr/src/app/package.json
-      - ./src/main/:/usr/src/app
+      - ./services/main-service/package.json:/usr/src/app/package.json
+      - ./services/main-service/:/usr/src/app
       - node-main-node_modules:/usr/src/app/node_modules
     networks:
       - my-network
@@ -59,8 +59,8 @@ services:
     command: sh -c "yarn install && yarn run dev && echo 'Background Process Server started on http://localhost:${NODE_BACKGROUND_HOST_PORT}'"
     working_dir: /usr/src/app
     volumes:
-      - ./src/background/package.json:/usr/src/app/package.json
-      - ./src/background/:/usr/src/app
+      - ./services/background-service/package.json:/usr/src/app/package.json
+      - ./services/background-service/:/usr/src/app
       - node-background-node_modules:/usr/src/app/node_modules
     networks:
       - my-network
