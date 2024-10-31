@@ -36,7 +36,7 @@ services:
       - ./.env
     ports:
       - "${NODE_MAIN_HOST_PORT}:${NODE_MAIN_CONTAINER_PORT}"
-    command: sh -c "yarn install && yarn run dev && echo 'Main Process Server started on http://localhost:${NODE_MAIN_HOST_PORT}'"
+    command: sh -c "yarn install && yarn prisma generate && yarn run dev"
     working_dir: /usr/src/app
     volumes:
       - ./services/main-service/package.json:/usr/src/app/package.json
@@ -56,7 +56,7 @@ services:
       - ./.env
     ports:
       - "${NODE_BACKGROUND_HOST_PORT}:${NODE_BACKGROUND_CONTAINER_PORT}"
-    command: sh -c "yarn install && yarn run dev && echo 'Background Process Server started on http://localhost:${NODE_BACKGROUND_HOST_PORT}'"
+    command: sh -c "yarn install && yarn prisma generate && yarn run dev"
     working_dir: /usr/src/app
     volumes:
       - ./services/background-service/package.json:/usr/src/app/package.json
