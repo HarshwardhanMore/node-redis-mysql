@@ -2,20 +2,9 @@ version: '3.8'
 
 services:
 
-  redis:
-    image: redis:7.4.1
-    container_name: redis
-    command: redis-server --appendonly yes
-    ports:
-      - "${REDIS_HOST_PORT}:${REDIS_CONTAINER_PORT}"
-    volumes:
-      - my-redis:/data
-    networks:
-      - my-network
-
-  mysql:
+  mysqldb:
     image: mysql:8.4
-    container_name: mysql
+    container_name: mysqldb
     env_file:
       - ./.env
     environment:
@@ -24,35 +13,67 @@ services:
     ports:
       - $MYSQLDB_HOST_PORT:$MYSQLDB_CONTAINER_PORT
     volumes:
-      - my-db:/var/lib/mysql
+      - mysqldb:/var/lib/mysql
     networks:
       - my-network
     restart: always
 
-  node:
+  redis:
+    image: redis:7.4.1
+    container_name: redis
+    command: redis-server --appendonly yes
+    ports:
+      - "${REDIS_HOST_PORT}:${REDIS_CONTAINER_PORT}"
+    volumes:
+      - redis:/data
+    networks:
+      - my-network
+
+  node-main:
     image: node:23.1.0-alpine3.19
-    container_name: node
+    container_name: node-main
     env_file:
       - ./.env
     ports:
-      - "${NODE_HOST_PORT}:${NODE_CONTAINER_PORT}"
-    command: sh -c "yarn install && yarn run dev && echo 'Server started on http://localhost:${NODE_HOST_PORT}'"
+      - "${NODE_MAIN_HOST_PORT}:${NODE_MAIN_CONTAINER_PORT}"
+    command: sh -c "yarn install && yarn run dev && echo 'Main Process Server started on http://localhost:${NODE_MAIN_HOST_PORT}'"
     working_dir: /usr/src/app
     volumes:
-      - ./package.json:/usr/src/app/package.json
-      - ./:/usr/src/app
-      - my-node_modules:/usr/src/app/node_modules
+      - ./src/main/package.json:/usr/src/app/package.json
+      - ./src/main/:/usr/src/app
+      - node-main-node_modules:/usr/src/app/node_modules
     networks:
       - my-network
     restart: always
     depends_on:
-      - mysql
+      - mysqldb
+      - redis
+
+  node-background:
+    image: node:23.1.0-alpine3.19
+    container_name: node-background
+    env_file:
+      - ./.env
+    ports:
+      - "${NODE_BACKGROUND_HOST_PORT}:${NODE_BACKGROUND_CONTAINER_PORT}"
+    command: sh -c "yarn install && yarn run dev && echo 'Background Process Server started on http://localhost:${NODE_BACKGROUND_HOST_PORT}'"
+    working_dir: /usr/src/app
+    volumes:
+      - ./src/background/package.json:/usr/src/app/package.json
+      - ./src/background/:/usr/src/app
+      - node-background-node_modules:/usr/src/app/node_modules
+    networks:
+      - my-network
+    restart: always
+    depends_on:
+      - mysqldb
       - redis
 
 volumes:
-  my-redis:
-  my-db:
-  my-node_modules:
+  redis:
+  mysqldb:
+  node-main-node_modules:
+  node-background-node_modules:
 
 networks:
   my-network:
